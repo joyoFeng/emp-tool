@@ -77,7 +77,7 @@ assert(c.open(decom, com, data, 1024*1024)); // open, return if the decommitment
 ```
 
 ## On-the-fly Circuit Compiler
-
+There is no official circuit compiler offered by emp-toolkit, but Juzix Corp.Ltd () has made one with Frutta which is a C-like script language, detail of it can be found here [Frutta](https://www.juzix.net/en/JUGOEN/index.jhtml)
 
 ## [Acknowledgement, Reference, and Questions](https://github.com/emp-toolkit/emp-readme/blob/master/README.md#citation)
 
