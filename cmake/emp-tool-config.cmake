@@ -1,28 +1,11 @@
 find_package(OpenSSL REQUIRED)
+
+if (NOT OT_NP_USE_MIRACL)
 find_package(relic REQUIRED)
+find_package(gmp REQUIRED)
+endif(OT_NP_USE_MIRACL)
+
 find_package(Boost REQUIRED COMPONENTS system)
-
-# GMP
-# https://raw.githubusercontent.com/stevedekorte/io/master/modules/FindGMP.cmake
-
-# Try to find the GMP librairies
-# GMP_FOUND - system has GMP lib
-# GMP_INCLUDE_DIR - the GMP include directory
-# GMP_LIBRARIES - Libraries needed to use GMP
-
-if (GMP_INCLUDE_DIR AND GMP_LIBRARIES)
-		# Already in cache, be silent
-		set(GMP_FIND_QUIETLY TRUE)
-endif (GMP_INCLUDE_DIR AND GMP_LIBRARIES)
-
-find_path(GMP_INCLUDE_DIR NAMES gmp.h )
-find_library(GMP_LIBRARIES NAMES gmp libgmp )
-find_library(GMPXX_LIBRARIES NAMES gmpxx libgmpxx )
-MESSAGE(STATUS "GMP libs: " ${GMP_LIBRARIES} " " ${GMPXX_LIBRARIES} )
-
-mark_as_advanced(GMP_INCLUDE_DIR GMP_LIBRARIES)
-# end of GMP
-
 find_path(EMP-TOOL_INCLUDE_DIR NAMES emp-tool/emp-tool.h)
 find_library(EMP-TOOL_LIBRARY NAMES emp-tool)
 

@@ -1,8 +1,9 @@
+#ifndef OT_NP_USE_MIRACL
 #ifndef HASH_H__
 #define HASH_H__
 
-#include "emp-tool/utils/block.h"
-#include "emp-tool/utils/constants.h"
+#include "block.h"
+#include "constants.h"
 #include <openssl/sha.h>
 #include <stdio.h>
 
@@ -70,3 +71,4 @@ class Hash { public:
 }
 /**@}*/
 #endif// HASH_H__
+#endif//OT_NP_USE_MIRACL

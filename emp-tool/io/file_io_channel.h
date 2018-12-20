@@ -18,7 +18,7 @@
   */
   
 namespace emp {
-class FileIO: public IOChannel<FileIO> { public:
+class FileIO: public IOChannel { public:
 	uint64_t bytes_sent = 0;
 	int mysocket = -1;
 	FILE * stream = nullptr;
@@ -46,7 +46,7 @@ class FileIO: public IOChannel<FileIO> { public:
 	void reset() {
 		rewind(stream);
 	}
-	void send_data(const void * data, int len) {
+	int send_data(const void * data, int len) {
 		bytes_sent += len;
 		int sent = 0;
 		while(sent < len) {
@@ -54,18 +54,28 @@ class FileIO: public IOChannel<FileIO> { public:
 			if (res >= 0)
 				sent+=res;
 			else
+			{
 				fprintf(stderr,"error: file_send_data %d\n", res);
+				return -1;
+			}	
 		}
+
+		return 0;
 	}
-	void recv_data(void  * data, int len) {
+	int recv_data(void  * data, int len) {
 		int sent = 0;
 		while(sent < len) {
 			int res = fread(sent+(char*)data, 1, len-sent, stream);
 			if (res >= 0)
 				sent+=res;
 			else 
+			{
 				fprintf(stderr,"error: file_recv_data %d\n", res);
+				return -1;
+			}
 		}
+
+		return 0;
 	}
 };
 /**@}*/

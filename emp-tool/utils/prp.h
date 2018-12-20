@@ -1,5 +1,5 @@
-#include "emp-tool/utils/block.h"
-#include "emp-tool/utils/constants.h"
+#include "block.h"
+#include "constants.h"
 #include "emp-tool/garble/aes.h"
 #include <stdio.h>
 #ifndef PRP_H__

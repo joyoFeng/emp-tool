@@ -34,10 +34,11 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin )
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib )
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 
 #Compilation flags
-set (CMAKE_C_FLAGS "-pthread -Wall -march=native -O3 -maes -mrdseed")
+set (CMAKE_C_FLAGS "-pthread -Wall -march=native -O3 -msse2 -maes -mrdseed")
 set (CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ggdb")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
@@ -45,5 +46,5 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 #Testing macro
 macro (add_test_with_lib _name libs)
 	add_executable(${_name} "test/${_name}.cpp" ${sources})
-	target_link_libraries(${_name}  ${RELIC_LIBRARIES} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} ${GMP_LIBRARIES} ${libs}) 
+	target_link_libraries(${_name}  ${libs}) #${RELIC_LIBRARIES} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} ${GMP_LIBRARIES} 
 endmacro()

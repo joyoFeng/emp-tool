@@ -3,12 +3,13 @@
 #include <iostream>
 #include <string>
 #include "emp-tool/io/net_io_channel.h"
+#include <cassert>
 /** @addtogroup IO
     @{
   */
   
 namespace emp {
-class CheckIO: public IOChannel<CheckIO> { public:
+class CheckIO: public IOChannel { public:
 	NetIO * netio;
 	bool check_result = true;
 	char * buffer = nullptr;
@@ -32,9 +33,10 @@ class CheckIO: public IOChannel<CheckIO> { public:
 	}
 
 
-	void recv_data(void  * data, int len) {
+	int recv_data(void  * data, int len) {
+		return 0;
 	}
-	void send_data(const void * data, int len) {
+	int send_data(const void * data, int len) {
 		assert(len < CHECK_BUFFER_SIZE);
 		if(check_size + len >= CHECK_BUFFER_SIZE) {
 			netio->recv_data(net_buffer, check_size);
@@ -43,6 +45,8 @@ class CheckIO: public IOChannel<CheckIO> { public:
 		}
 		memcpy(buffer+check_size, data, len);
 		check_size += len;
+
+		return 0;
 	}
 };
 }

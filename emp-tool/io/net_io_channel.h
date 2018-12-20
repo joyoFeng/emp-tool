@@ -23,7 +23,7 @@ namespace emp {
   @{
  */
 
-class NetIO: public IOChannel<NetIO> { public:
+class NetIO: public IOChannel { public:
 	bool is_server;
 	int mysocket = -1;
 	int consocket = -1;
@@ -118,7 +118,7 @@ class NetIO: public IOChannel<NetIO> { public:
 		fflush(stream);
 	}
 
-	void send_data(const void * data, int len) {
+	int send_data(const void * data, int len) {
 		counter += len;
 		int sent = 0;
 		while(sent < len) {
@@ -126,12 +126,17 @@ class NetIO: public IOChannel<NetIO> { public:
 			if (res >= 0)
 				sent+=res;
 			else
+			{
 				fprintf(stderr,"error: net_send_data %d\n", res);
+				return -1;
+			}	
 		}
 		has_sent = true;
+
+		return 0;
 	}
 
-	void recv_data(void  * data, int len) {
+	int recv_data(void  * data, int len) {
 		if(has_sent)
 			fflush(stream);
 		has_sent = false;
@@ -139,10 +144,15 @@ class NetIO: public IOChannel<NetIO> { public:
 		while(sent < len) {
 			int res = fread(sent + (char*)data, 1, len - sent, stream);
 			if (res >= 0)
-				sent += res;
+			{	sent += res;}
 			else 
+			{	
 				fprintf(stderr,"error: net_send_data %d\n", res);
+				return -1;
+			}
 		}
+
+		return 0;
 	}
 };
 /**@}*/

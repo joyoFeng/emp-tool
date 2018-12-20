@@ -1,10 +1,18 @@
 #ifndef UTILS_H__
 #define UTILS_H__
+
 #include <string>
-#include "emp-tool/utils/block.h"
+#include "block.h"
 #include <sstream>
 #include <cstddef>//https://gcc.gnu.org/gcc-4.9/porting_to.html
+
+#ifndef OT_NP_USE_MIRACL
 #include <gmp.h>
+#else
+////Note: we take miracl functions instead of gmp !
+#include "emp-tool/utils/miracl_utils.h"
+#endif
+
 #include "emp-tool/utils/prg.h"
 #include <chrono>
 #define macro_xstr(a) macro_str(a)

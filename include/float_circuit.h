@@ -1,10 +1,10 @@
 #ifndef FLOAT_H__
 #define FLOAT_H__
 
-#include "emp-tool/circuits/bit.h"
-#include "emp-tool/circuits/integer.h"
-#include "emp-tool/circuits/swappable.h"
-#include "emp-tool/circuits/number.h"
+#include "bit.h"
+#include "integer.h"
+#include "swappable.h"
+#include "number.h"
 #include <math.h>
 namespace emp {
 class Float: Swappable<Float> { public:
@@ -30,9 +30,12 @@ class Float: Swappable<Float> { public:
 
 	Float If(const Bit& select, const Float & d);
 
-	template<typename O> 
-	O reveal(int party = PUBLIC) const;
+	// template<typename O> 
+	// O reveal(int party = PUBLIC) const;
 
+	string reveal_string(int party = PUBLIC) const;
+	double reveal(int party = PUBLIC) const;
+	
 	int size() const;
 	Float abs() const;
 
@@ -53,6 +56,6 @@ class Float: Swappable<Float> { public:
 	Float operator^(const Float& rhs) const;
 };
 
-#include "emp-tool/circuits/float_circuit.hpp"
+//#include "emp-tool/circuits/float_circuit.hpp"
 }
 #endif// DOUBLE_H__

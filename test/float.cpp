@@ -29,10 +29,10 @@ void test_float(double precision, int runs = 1000) {
 		Float b(24, 9, db, PUBLIC);
 		Float res = Op2()(a,b);
 
-		if (not accurate(res.reveal<double>(PUBLIC), Op()(da,db), precision)) {
-			cout << "Inaccuracy:\t"<<typeid(Op2).name()<<"\t"<< da <<"\t"<<db<<"\t"<<Op()(da,db)<<"\t"<<res.reveal<double>(PUBLIC)<<endl<<flush;
+		if (not accurate(res.reveal(PUBLIC), Op()(da,db), precision)) {
+			cout << "Inaccuracy:\t"<<typeid(Op2).name()<<"\t"<< da <<"\t"<<db<<"\t"<<Op()(da,db)<<"\t"<<res.reveal(PUBLIC)<<endl<<flush;
 		}
-		assert(accurate(res.reveal<double>(PUBLIC),  Op()(da,db), precision*10));
+		assert(accurate(res.reveal(PUBLIC),  Op()(da,db), precision*10));
 	}
 	cout << typeid(Op2).name()<<"\t\t\tDONE"<<endl;
 }
@@ -40,12 +40,12 @@ void test_float(double precision, int runs = 1000) {
 void scratch_pad() {
 	Float a(24, 9, 0.21, PUBLIC);
 	Float b(24, 9, 0.41, PUBLIC);
-	cout << a.reveal<double>(PUBLIC)<<endl;
-	cout << b.reveal<double>(PUBLIC)<<endl;
-	cout << (a+b).reveal<double>(PUBLIC)<<endl;
-	cout << (a-b).reveal<double>(PUBLIC)<<endl;
-	cout << (a*b).reveal<double>(PUBLIC)<<endl;
-	double res = (a/b).reveal<double>(BOB);
+	cout << a.reveal(PUBLIC)<<endl;
+	cout << b.reveal(PUBLIC)<<endl;
+	cout << (a+b).reveal(PUBLIC)<<endl;
+	cout << (a-b).reveal(PUBLIC)<<endl;
+	cout << (a*b).reveal(PUBLIC)<<endl;
+	double res = (a/b).reveal(BOB);
 	cout << res <<endl;
 }
 

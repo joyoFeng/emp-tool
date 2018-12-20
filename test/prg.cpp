@@ -1,5 +1,10 @@
 #include "emp-tool/emp-tool.h"
 #include <iostream>
+
+#ifndef OT_NP_USE_MIRACL
+#include "emp-tool/utils/utils_ec.h"
+#endif
+
 using namespace std;
 using namespace emp;
 
@@ -16,7 +21,7 @@ int main() {
 
 	int rand_ints[100];
 	prg.random_data_unaligned(rand_ints+2, sizeof(int)*98);//when the array is not 128-bit-aligned
-
+#ifndef OT_NP_USE_MIRACL
 	initialize_relic();
 	bn_t bn1, bn2, bn3;
 	bn_newl(bn1, bn2, bn3);
@@ -29,6 +34,7 @@ int main() {
 	mpz_t integ;
 	mpz_init(integ);
 	prg.random_mpz(integ, 1024);//random number with 1024 bits.
+#endif//
 
 	for (long long length = 2; length <= 8192; length*=2) {
 		long long times = 1024*1024*32/length;

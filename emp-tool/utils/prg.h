@@ -1,11 +1,14 @@
 #ifndef PRG_H__
 #define PRG_H__
-#include "emp-tool/utils/block.h"
+#include "block.h"
+#include "emp-tool/utils/block_utils.h"
 #include "emp-tool/garble/aes.h"
-#include "emp-tool/utils/constants.h"
-#include "emp-tool/utils/utils_ec.h"
-#include <gmp.h>
+#include "constants.h"
 #include <random>
+
+#ifndef OT_NP_USE_MIRACL
+#include "emp-tool/utils/utils_ec.h"
+#endif//
 
 #ifdef EMP_USE_RANDOM_DEVICE
 #else
@@ -86,6 +89,7 @@ class PRG { public:
 		AES_ecb_encrypt_blks(data+i, (AES_BATCH_SIZE >  nblocks-i) ? nblocks-i:AES_BATCH_SIZE, &aes);
 	}
 
+#ifndef OT_NP_USE_MIRACL
 	template<typename T, typename ... L>
 		void random_bn(T t, L... l) {
 			random_bn(l...);
@@ -159,6 +163,7 @@ class PRG { public:
 			}
 		}
 	}
+#endif//OT_NP_USE_MIRACL
 };
 }
 /**@}*/

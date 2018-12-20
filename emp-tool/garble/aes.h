@@ -56,7 +56,8 @@
     #error "AES-NI instructions not enabled"
 #endif
 
-#include "emp-tool/utils/block.h"
+#include "block.h"
+#include "emp-tool/utils/sse.h"
 
 namespace emp { 
 

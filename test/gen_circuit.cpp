@@ -5,14 +5,14 @@ void ham(int n) {
 	Integer b(n, 0, BOB);
 	Integer c = a^b;
 	Integer d = c.hamming_weight();
-	d.reveal<string>();
+	d.reveal_string();
 }
 
 void mult(int n) {
 	Integer a(n, 0, ALICE);
 	Integer b(n, 0, BOB);
 	Integer c = a*b;
-	c.reveal<string>();
+	c.reveal_string();
 }
 void modexp(int n1, int n2) {
 	Integer a(n1, 0,  ALICE);
@@ -31,7 +31,7 @@ void sort(int n) {
 		A[i] = A[i] ^ B[i];
 	sort(A, n);
 	for(int i = 0; i < n; ++i)
-		A[i].reveal<string>();
+		A[i].reveal_string();
 }
 int main(int argc, char** argv) {
 	setup_plain_prot(true, "sort.txt");

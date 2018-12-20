@@ -1,6 +1,6 @@
 #ifndef PLAIN_CIRC_EXEC_H__
 #define PLAIN_CIRC_EXEC_H__
-#include "emp-tool/utils/block.h"
+#include "block.h"
 #include "emp-tool/utils/utils.h"
 #include "emp-tool/execution/circuit_execution.h"
 #include <iostream>
@@ -37,6 +37,12 @@ public:
 		}
 		filename = filename;
 	}
+
+	~PlainCircExec()
+	{
+		finalize();
+	}
+
 	void finalize() {
 		if(print) {
 			fout.clear();
@@ -130,6 +136,12 @@ public:
 			return res;
 		}
 	}
+
+	// //Note: not use this implementation
+	// block delta() override {
+	// 	block b;//not use
+	// 	return b;
+	// }
 
 private:
 	uint64_t compute_and(uint64_t a, uint64_t b) {

@@ -25,18 +25,18 @@ void test_int(int party, int range1 = 1<<25, int range2 = 1<<25, int runs = 1000
 
 		Integer res = Op2()(a,b);
 
-		if (res.reveal<int>(PUBLIC) != Op()(ia,ib)) {
-			cout << ia <<"\t"<<ib<<"\t"<<Op()(ia,ib)<<"\t"<<res.reveal<int>(PUBLIC)<<endl<<flush;
+		if (res.reveal(PUBLIC) != Op()(ia,ib)) {
+			cout << ia <<"\t"<<ib<<"\t"<<Op()(ia,ib)<<"\t"<<res.reveal(PUBLIC)<<endl<<flush;
 		}
-		assert(res.reveal<int>(PUBLIC) == Op()(ia,ib));
+		assert(res.reveal(PUBLIC) == Op()(ia,ib));
 	}
 	cout << typeid(Op2).name()<<"\t\t\tDONE"<<endl;
 }
 
 void scratch_pad() {
 	Integer a(32, 9, ALICE);
-	cout << "HW "<<a.hamming_weight().reveal<string>(PUBLIC)<<endl;
-	cout << "LZ "<<a.leading_zeros().reveal<string>(PUBLIC)<<endl;
+	cout << "HW "<<a.hamming_weight().reveal_string(PUBLIC)<<endl;
+	cout << "LZ "<<a.leading_zeros().reveal_string(PUBLIC)<<endl;
 }
 int main(int argc, char** argv) {
 	int party = PUBLIC;

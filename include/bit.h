@@ -1,22 +1,23 @@
 #ifndef BIT_H__
 #define BIT_H__
-#include "emp-tool/execution/circuit_execution.h"
-#include "emp-tool/execution/protocol_execution.h"
-#include "emp-tool/utils/utils.h"
-#include "emp-tool/utils/block.h"
-#include "emp-tool/circuits/swappable.h"
+
+#include <string>
+#include "block.h"
+#include "swappable.h"
+#include "constants.h"
+
+using std::string;
 
 namespace emp {
 class Bit : public Swappable<Bit>{ public:
 	block bit;
 
 	Bit(bool _b = false, int party = PUBLIC);
-	Bit(const block& a) {
-		memcpy(&bit, &a, sizeof(block));
-	}
+	Bit(const block& a);
 
-	template<typename O = bool> 
-	O reveal(int party = PUBLIC) const;
+	bool reveal(int party = PUBLIC) const;
+
+	string reveal_string(int party = PUBLIC) const;
 
 	Bit operator!=(const Bit& rhs) const; 
 	Bit operator==(const Bit& rhs) const;
@@ -38,10 +39,8 @@ class Bit : public Swappable<Bit>{ public:
 		b[0] = data;
 	}
 
-	Bit(size_t size, const block* a) {
-		memcpy(&bit, a, sizeof(block));
-	}
+	Bit(size_t size, const block* a);
 };
-#include "emp-tool/circuits/bit.hpp"
+//#include "emp-tool/circuits/bit.hpp"
 }
 #endif

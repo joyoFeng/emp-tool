@@ -1,27 +1,23 @@
 #ifndef BATCHER_H__
 #define BATCHER_H__
+
 #include <vector>
-//#include "emp-tool/execution/circuit_execution.h"
-#include "emp-tool/execution/protocol_execution.h"
+#include <cstddef>
+#include "block.h"
 using std::vector;
 
 namespace emp {
+class ProtocolExecution;
 class Batcher { public:
 	vector<bool> values;
 	vector<int> lens;
 	int len_ptr = 0;
 	block * labels = nullptr;
 	block * label_ptr = nullptr;
-	void add(bool * b, int length) {
-		lens.push_back(length);
-		for(int i = 0; i < length; ++i)
-			values.push_back(b[i]);
-	}
 
-	~Batcher(){
-		if(labels != nullptr)
-			delete[] labels;
-	}
+	void add(bool * b, int length);
+
+	~Batcher();
 
 	template<typename T, typename... Args>
 	void add(Args&&... args) {
@@ -38,23 +34,9 @@ class Batcher { public:
 		}
 	}
 	
-	void make_semi_honest(int party, ProtocolExecution * be = nullptr) {
-		ProtocolExecution * t = be;
-		if(be == nullptr)
-			t = ProtocolExecution::prot_exec;
-		bool * bools = new bool[size()];
-		to_bool(bools);
-		label_ptr = labels = new block[size()];
-		t->feed(labels, party, bools, size());
-		len_ptr = 0;
-		delete[] bools;
-	}
+	void make_semi_honest(int party, ProtocolExecution * be = nullptr);
 
-	void set_blocks(block * b) {
-		this->labels = b;
-		this->label_ptr = b;
-		len_ptr = 0;
-	}
+	void set_blocks(block * b);
 
 	template<typename T>
 	T next() {

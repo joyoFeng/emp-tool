@@ -1,4 +1,14 @@
-inline Float::Float(int value_length, int expnt_length, double input, int party) {
+#include "float_circuit.h"
+#include <cmath>
+
+
+using std::pow;
+using std::string;
+
+namespace emp
+{
+
+Float::Float(int value_length, int expnt_length, double input, int party) {
    double abs = std::abs(input);
    double lo = pow(2, value_length-2);
    double up = pow(2, value_length-1);
@@ -9,45 +19,43 @@ inline Float::Float(int value_length, int expnt_length, double input, int party)
    value = Integer(value_length, (long long)(abs*(input > 0 ? 1: -1)), party);
 }
 
-inline Float Float::If(const Bit & select, const Float& d) {
+Float Float::If(const Bit & select, const Float& d) {
 	Float res(*this);
    res.value = value.If(select, d.value);
    res.expnt = expnt.If(select, d.expnt);
    return res;
 }
 
-template<>
-inline string Float::reveal<string>(int party) const {
-   double val = value.reveal<long long>(party);
-   double exp = expnt.reveal<long long>(party);
+string Float::reveal_string(int party) const {
+   double val = value.reveal(party);
+   double exp = expnt.reveal(party);
    return std::to_string(val*pow(2.0, exp)); 
 }
 
-template<>
-inline double Float::reveal<double>(int party) const {
-   double val = value.reveal<long long>(party);
-   double exp = expnt.reveal<long long>(party);
+double Float::reveal(int party) const {
+   double val = value.reveal(party);
+   double exp = expnt.reveal(party);
    return val*pow(2.0, exp); 
 }
 
-inline string Float::detail(int party) const {
-   string res = reveal<string>(party);
-   res += (" v: " + value.reveal<string>(party));
-   res += (" p: " + expnt.reveal<string>(party));
+string Float::detail(int party) const {
+   string res = reveal_string(party);
+   res += (" v: " + value.reveal_string(party));
+   res += (" p: " + expnt.reveal_string(party));
    return res;
 }
 
-inline int Float::size() const {
+int Float::size() const {
    return value.size()+expnt.size();
 }
 
-inline Float Float::abs() const {
+Float Float::abs() const {
    Float res(*this);
    res.value = value.abs();
    return res;
 }
 
-inline void Float::normalize(int value_length, int to_add_to_expnt) {
+void Float::normalize(int value_length, int to_add_to_expnt) {
    Integer value_before_normalize = value;
    Integer bits_to_shift(value_before_normalize.size(), 0, PUBLIC);
    for(int i = bits_to_shift.size()-1; i>0; --i)
@@ -67,7 +75,7 @@ inline void Float::normalize(int value_length, int to_add_to_expnt) {
    expnt = expnt + Integer(expnt.size(), (value_before_normalize.size() + to_add_to_expnt - value_length), PUBLIC);
 }
 
-inline Float Float::operator+(const Float& rhs) const{
+Float Float::operator+(const Float& rhs) const{
 	Float res(*this);
    Integer diff = expnt - rhs.expnt;
    Integer diff_abs = diff.abs();
@@ -85,17 +93,17 @@ inline Float Float::operator+(const Float& rhs) const{
    return res;
 }
 
-inline Float Float::operator-(const Float& rhs) const {
+Float Float::operator-(const Float& rhs) const {
 	return (*this) + (-rhs);
 }
 
-inline Float Float::operator-() const {
+Float Float::operator-() const {
    Float res = *this;
    res.value = -res.value;
    return res;
 }
 
-inline Float Float::operator*(const Float& rhs) const {
+Float Float::operator*(const Float& rhs) const {
 	Float res(*this);
 	Integer v1 = value;
 	Integer v2 = rhs.value;
@@ -114,7 +122,7 @@ inline Float Float::operator*(const Float& rhs) const {
    return res;
 }
 
-inline Integer divide_frac(const Integer& lhs, const Integer& rhs) {
+Integer divide_frac(const Integer& lhs, const Integer& rhs) {
    Integer i1 = lhs, i2 = rhs;
    i1.resize(rhs.size()*2+1, false);
    i2.resize(rhs.size()*2+1, false);
@@ -136,7 +144,7 @@ inline Integer divide_frac(const Integer& lhs, const Integer& rhs) {
 
 
 //to optimize
-inline Float Float::operator/(const Float& rhs) const {
+Float Float::operator/(const Float& rhs) const {
 	Float res(*this);
    Bit sign = rhs.value[rhs.value.size()-1] != value[value.size()-1];
    Integer v_tmp = value.abs();
@@ -148,31 +156,33 @@ inline Float Float::operator/(const Float& rhs) const {
    return res;
 }
 
-inline Float Float::operator|(const Float& rhs) const{
+Float Float::operator|(const Float& rhs) const{
 	Float res(*this);
    res.expnt = expnt | rhs.expnt;
    res.value = value | rhs.value;
    return res;
 }
 
-inline Float Float::operator^(const Float& rhs) const{
+Float Float::operator^(const Float& rhs) const{
 	Float res(*this);
    res.expnt = expnt ^ rhs.expnt;
    res.value = value ^ rhs.value;
    return res;
 }
 
-inline Float Float::operator&(const Float& rhs) const{
+Float Float::operator&(const Float& rhs) const{
 	Float res(*this);
    res.expnt = expnt & rhs.expnt;
    res.value = value & rhs.value;
    return res;
 }
 
-inline Bit Float::greater(const Float& rhs) const {
+Bit Float::greater(const Float& rhs) const {
    Float tmp = (*this) - rhs;
    return !tmp.value[tmp.value.size()-1];
 }
-inline Bit Float::equal(const Float& rhs) const {
+Bit Float::equal(const Float& rhs) const {
 	return false;
+}
+
 }

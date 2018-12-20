@@ -9,7 +9,7 @@
   @{
  */
 namespace emp {
-class MemIO: public IOChannel<MemIO> { public:
+class MemIO: public IOChannel { public:
 	char * buffer = nullptr;
 	int64_t size = 0;
 	int64_t read_pos = 0;
@@ -35,7 +35,8 @@ class MemIO: public IOChannel<MemIO> { public:
 	void clear() {
 		size = 0;
 	}
-	void send_data(const void * data, int64_t len) {
+	
+	int send_data(const void * data, int len) {
 		if(size + len >= cap){
 			char * new_buffer = new char[2*(cap+len)];
 			memcpy(new_buffer, buffer, size);
@@ -45,15 +46,20 @@ class MemIO: public IOChannel<MemIO> { public:
 		}
 		memcpy(buffer + size, data, len);
 		size += len;
+
+		return 0;
 	}
 
-	void recv_data(void  * data, int64_t len) {
+	int recv_data(void  * data, int len) {
 		if(read_pos + len <= size) {
 			memcpy(data, buffer + read_pos, len);
 			read_pos += len;
 		} else {
 			fprintf(stderr,"error: mem_recv_data\n");
+			return -1;
 		}
+
+		return 0;
 	}
 };
 /**@}*/

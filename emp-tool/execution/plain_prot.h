@@ -17,7 +17,7 @@ public:
 	vector<int64_t>output_vec;
 	PlainProt(bool _print, string _filename) : print(_print), 
 	filename(_filename) {
-	 cast_circ_exec = static_cast<PlainCircExec *> (CircuitExecution::circ_exec);
+	 cast_circ_exec = static_cast<PlainCircExec *> (CircuitExecutionProxy::circ_exec.circ_exec_);
 	}
 
 	void finalize() {
@@ -48,24 +48,25 @@ public:
 };
 
 inline void setup_plain_prot(bool print, string filename) {
-	CircuitExecution::circ_exec = new PlainCircExec(print, filename);
-	ProtocolExecution::prot_exec = new PlainProt(print, filename);
+	CircuitExecutionProxy::circ_exec.setup(new PlainCircExec(print, filename));
+	ProtocolExecutionProxy::prot_exec.setup(new PlainProt(print, filename));
 }
 
 inline void finalize_plain_prot () {
-	PlainCircExec * cast_circ_exec = static_cast<PlainCircExec *> (CircuitExecution::circ_exec);
-	PlainProt * cast_prot_exec = static_cast<PlainProt*> (ProtocolExecution::prot_exec);
+	PlainCircExec * cast_circ_exec = static_cast<PlainCircExec *> (CircuitExecutionProxy::circ_exec.circ_exec_);
+	PlainProt * cast_prot_exec = static_cast<PlainProt*> (ProtocolExecutionProxy::prot_exec.prot_exec_);
 	int64_t z_index = cast_circ_exec->gid++;
 	cast_circ_exec->fout<<2<<" "<<1<<" "<<0<<" "<<0<<" "<<z_index<<" XOR"<<endl;
 	for (auto v : cast_prot_exec->output_vec) {
 		cast_circ_exec->fout<<2<<" "<<1<<" "<<z_index<<" "<<v<<" "<<cast_circ_exec->gid++<<" XOR"<<endl;
 	}
 	cast_circ_exec->gates += (1+cast_prot_exec->output_vec.size());
-	cast_circ_exec->finalize();
+	//cast_circ_exec->finalize();
 
-	ProtocolExecution::prot_exec->finalize();
-	delete PlainCircExec::circ_exec;
-	delete ProtocolExecution::prot_exec;
+	ProtocolExecutionProxy::prot_exec.finalize();
+	CircuitExecutionProxy::circ_exec.finalize();
+	//delete PlainCircExec::circ_exec;
+	//delete ProtocolExecutionProxy::prot_exec;
 }
 }
 #endif 
