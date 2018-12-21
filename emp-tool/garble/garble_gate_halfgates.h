@@ -1,7 +1,7 @@
 #ifndef LIBGARBLE_GARBLE_GATE_HALFGATES_H
 #define LIBGARBLE_GARBLE_GATE_HALFGATES_H
 
-#include "emp-tool/garble/aes.h"
+#include "emp-tool/garble/garble_aes.h"
 #include <string.h>
 namespace emp {
 inline void garble_gate_eval_halfgates(block A, block B, 

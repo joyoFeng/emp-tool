@@ -61,7 +61,11 @@ inline string dec_to_bin(const string& dec) {
 
 
 inline string change_base(string str, int old_base, int new_base) {
-#ifndef OT_NP_USE_MIRACL
+#if defined(_WIN32) && defined(OT_NP_USE_MIRACL)
+	//use miracl
+	//fprintf(stderr, "change_base: %s, old: %d, new: %d \n", str.data(), old_base, new_base);
+	return transfer_base(str, old_base, new_base);
+#else
 	mpz_t tmp;
 	mpz_init_set_str (tmp, str.c_str(), old_base);
 	char * b = new char[mpz_sizeinbase(tmp, new_base) + 2];
@@ -70,11 +74,6 @@ inline string change_base(string str, int old_base, int new_base) {
 	string res(b);
 	delete[]b;
 	return res;
-#else
-	//use miracl
-	//fprintf(stderr, "change_base: %s, old: %d, new: %d \n", str.data(), old_base, new_base);
-	return transfer_base(str, old_base, new_base);
-
 #endif//
 }
 

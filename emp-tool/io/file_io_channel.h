@@ -5,11 +5,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
+//#include <unistd.h>
+//#include <arpa/inet.h>
+//#include <sys/types.h>
+//#include <netinet/in.h>
+//#include <sys/socket.h>
 #include <string>
 #include "emp-tool/io/io_channel.h"
 
@@ -60,7 +60,7 @@ class FileIO: public IOChannel { public:
 			}	
 		}
 
-		return 0;
+		return len;
 	}
 	int recv_data(void  * data, int len) {
 		int sent = 0;
@@ -75,7 +75,7 @@ class FileIO: public IOChannel { public:
 			}
 		}
 
-		return 0;
+		return len;
 	}
 };
 /**@}*/

@@ -1,67 +1,89 @@
-#ifndef IO_CHANNEL_H__
-#define IO_CHANNEL_H__
+#pragma once
+
 
 #include "block.h"
+#include <cstdint>
 
-#ifndef OT_NP_USE_MIRACL //default use relic
-#include "emp-tool/utils/utils_ec.h"
-#else
-#include "emp-tool/utils/miracl_utils.h"
-#endif//
+namespace emp
+{
+		class IOChannel 
+		{
+		public:
+			IOChannel();
+			virtual ~IOChannel();
 
-#include "emp-tool/utils/prg.h"
+			virtual int send_data(const void * data, int nbyte) = 0;
+			virtual int recv_data(void * data, int nbyte) = 0;
 
-/** @addtogroup IO
-  @{
- */
+			virtual void sync() {};
+			virtual void setNoDelay(bool flag) {};
 
-namespace emp {
+			virtual void flush() {};
 
-//Note: we change base IO template class to virtual class with interface send_data, recv_data
-class IOChannel {
-public:
-	PRG *prg = nullptr;
-	virtual int send_data(const void * data, int nbyte) = 0;
-	virtual int recv_data(void * data, int nbyte) = 0;
+			// int send_data(const void * data, int nbyte);
+			// int recv_data(void* data, int nbytes);
 
-	virtual void flush(){};
-	virtual void sync(){};
+			int send_block(const block* data, int nblock);
+			int recv_block(block* data, int nblock);
 
-	void send_block(const block* data, int nblock);
-	void recv_block(block* data, int nblock);
+			
+			void set_key(const block* b);
+			int send_data_enc(const void * data, int len);
 
-	IOChannel();
-	virtual ~IOChannel();
+			int send_block_enc(const block* data, int len);
 
-	void set_key(const block* b);
+			int recv_data_enc(void * data, int len);
 
-	void send_data_enc(const void * data, int len);
-	void send_block_enc(const block* data, int len);
+			int recv_block_enc(block* data, int len);
 
-	void recv_data_enc(void * data, int len);
-	void recv_block_enc(block* data, int len);
+#ifndef OT_NP_USE_MIRACL
+			int send_eb(const void * eb, size_t num);
 
-#ifndef OT_NP_USE_MIRACL //default use relic
-	void send_bn_enc(const bn_t * bn, size_t num);
-	void send_eb_enc(const eb_t * eb, size_t num);
+			int recv_eb(void* eb, size_t num);
 
-	void recv_eb_enc(eb_t* eb, size_t num);
-	void recv_bn_enc(bn_t* bn, size_t num);
+			int send_bn(const void * bn, size_t num);
 
-	void send_eb(const eb_t * eb, size_t num);
-	void recv_eb(eb_t* eb, size_t num);
+			int recv_bn(void* bn, size_t num);
+#else//miracl
+			int send_ep(void **ep, int num);
 
-	void send_bn(const bn_t * bn, size_t num);
-	void recv_bn(bn_t* bn, size_t num);
-#else//use miracl
-	int send_ep(epoint *ep, size_t num);
-	int recv_ep(epoint *ep, size_t num);
+			int recv_ep(void **ep, int num);
 
-	int send_bn(const big* bn, size_t num);
-	int recv_bn(big* bn, size_t num);
-#endif//OT_NP_USE_MIRACL
+			int send_bn(const void* bn, int num);
 
-};
-/**@}*/
-}
-#endif// IO_CHANNEL_H__
+			int recv_bn(void* bn, int num);
+#endif//JUZIX_OT_USE_RELIC
+
+
+			// int get_io_count() const { return io_recv_count + io_sent_count; };
+
+			// int get_io_recv_count() const { return io_recv_count; };
+
+			// int get_io_sent_count() const { return io_sent_count; };
+
+			// int get_io_state() const { return io_state; };
+
+			// int64_t get_io_time() const { return io_recv_cost_time + io_sent_cost_time; };
+
+			// int64_t get_io_sent_time() const { return io_sent_cost_time; };
+
+			// int64_t get_io_recv_time() const { return io_recv_cost_time; };
+
+			// int64_t get_io_sentbytes() const { return io_sent_bytes; };
+
+			// int64_t get_io_recvbytes() const { return io_recv_bytes; };
+
+			// void set_io_state(int state) { io_state = state; };
+
+		protected:
+			void *prg = nullptr;//Prg
+			// int	io_sent_count = 0;
+			// int io_recv_count = 0;
+			// int64_t io_sent_cost_time = 0;
+			// int64_t io_recv_cost_time = 0;
+			// int64_t io_sent_bytes = 0;
+			// int64_t io_recv_bytes = 0;
+			int io_state = 0;//0: good, -2: timeout, -1: error
+		};
+
+}//emp

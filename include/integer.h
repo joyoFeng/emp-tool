@@ -9,7 +9,7 @@
 #include <cstdint>
 
 using std::vector;
-using std::min;
+
 namespace emp {
 class Integer : public Swappable<Integer>, public Comparable<Integer> { public:
 	int length = 0;

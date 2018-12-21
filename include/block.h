@@ -52,4 +52,12 @@ typedef int32x4_t block_tpl[2];
 
 }//emp
 
+#ifdef _WIN32
+#define not !
+#define and &&
+#define or ||
+#define xor ^
+#endif
+
+
 #endif // BLOCK_H__

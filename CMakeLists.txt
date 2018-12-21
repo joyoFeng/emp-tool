@@ -15,6 +15,12 @@ include(cmake/threading.cmake)
 
 find_package(OpenSSL)
 
+if (NOT WIN32)
+	find_package(GMP)
+	include_directories(${GMP_INCLUDE_DIR})
+	link_libraries(${GMP_LIBRARIES})
+endif()
+
 if(NOT OT_NP_USE_MIRACL)
 	message(STATUS "Use RELIC")
     if(WIN32)
@@ -23,7 +29,6 @@ if(NOT OT_NP_USE_MIRACL)
 
 	# setup directory where we should look for cmake files
 	list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-	find_package(GMP)
 	find_package(relic) # compile relic should refer to emp-readme github repository (https://github.com/emp-toolkit/emp-readme)
 	#set(RELIC_LIBRARIES relic_s)
 	include_directories(${RELIC_INCLUDE_DIR})
@@ -52,9 +57,17 @@ endif()
 # protobuf dependencies
 include_directories(../protobuf/src)
 if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
-	SET(LIB_PROTOBUF protobufd)
+	if (WIN32)
+		SET(LIB_PROTOBUF libprotobufd)
+	else()
+		SET(LIB_PROTOBUF protobufd)
+	endif()
 else()
-	SET(LIB_PROTOBUF protobuf)
+	if (WIN32)
+		SET(LIB_PROTOBUF libprotobuf)
+	else()
+		SET(LIB_PROTOBUF libprotobuf)
+	endif()
 endif()
 link_libraries(${LIB_PROTOBUF})
 
@@ -93,6 +106,7 @@ add_library(${NAME}_static STATIC ${SRC_LIST})
 if(WIN32)
 	target_compile_options(${NAME}_static PRIVATE /D "EMP_TOOL_STATIC")
 	SET_TARGET_PROPERTIES(${NAME}_static PROPERTIES FOLDER ${NAME})
+	#target_link_libraries(${NAME}_static PUBLIC miracl)
 endif()
 
 SET_TARGET_PROPERTIES(${NAME}_static PROPERTIES
@@ -104,17 +118,21 @@ SET_TARGET_PROPERTIES(${NAME}_static PROPERTIES
 # installation
 install(DIRECTORY emp-tool DESTINATION include/)
 install(DIRECTORY cmake/ DESTINATION cmake/)
-install(TARGETS ${NAME} DESTINATION lib)
+#install(TARGETS ${NAME} DESTINATION lib)
 
 # emp test macro
 macro (emp_test _name)
 	message(STATUS "emp tool test: ${_name}")
     #aux_source_directory(./testutils EXE_SRC_LIST)
-    add_executable(emp_tool_${_name} ./test/${_name}.cpp ${EXE_SRC_LIST})
+    add_executable(emp_tool_${_name} ./test/${_name}.cpp)
     
     if(OT_NP_USE_MIRACL)
     	message(STATUS "the link libarary: ${NAME} , the target exe name: ${_name}")
-        target_link_libraries(${_name} ${NAME} ${OPENSSL_LIBRARIES} ${LIB_PROTOBUF})
+    	if (WIN32)
+        	target_link_libraries(emp_tool_${_name} ${NAME}_static ${OPENSSL_LIBRARIES} ${LIB_PROTOBUF})
+        else()
+        	target_link_libraries(emp_tool_${_name} ${NAME} ${OPENSSL_LIBRARIES} ${LIB_PROTOBUF})
+        endif()
    	else()
    		message(STATUS "the link libarary: ${NAME} , the target exe name: ${_name}")
    		target_link_libraries(emp_tool_${_name} ${NAME} ${OPENSSL_LIBRARIES} ${RELIC_LIBRARIES} ${GMP_LIBRARIES} ${LIB_PROTOBUF})

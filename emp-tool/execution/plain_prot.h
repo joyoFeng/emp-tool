@@ -1,6 +1,9 @@
 #ifndef PLAIN_ENV_H__
 #define PLAIN_ENV_H__
 #include "emp-tool/emp-tool.h"
+#ifdef OT_NP_USE_MIRACL
+#include "emp-tool/utils/sm2_params.h"
+#endif//
 #include <iostream>
 #include <fstream>
 using std::endl;
@@ -48,6 +51,10 @@ public:
 };
 
 inline void setup_plain_prot(bool print, string filename) {
+#ifdef OT_NP_USE_MIRACL
+	SM2_Init();
+#endif//
+	
 	CircuitExecutionProxy::circ_exec.setup(new PlainCircExec(print, filename));
 	ProtocolExecutionProxy::prot_exec.setup(new PlainProt(print, filename));
 }

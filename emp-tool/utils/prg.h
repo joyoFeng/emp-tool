@@ -2,7 +2,7 @@
 #define PRG_H__
 #include "block.h"
 #include "emp-tool/utils/block_utils.h"
-#include "emp-tool/garble/aes.h"
+#include "emp-tool/garble/garble_aes.h"
 #include "constants.h"
 #include <random>
 

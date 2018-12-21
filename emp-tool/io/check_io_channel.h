@@ -34,7 +34,7 @@ class CheckIO: public IOChannel { public:
 
 
 	int recv_data(void  * data, int len) {
-		return 0;
+		return len;
 	}
 	int send_data(const void * data, int len) {
 		assert(len < CHECK_BUFFER_SIZE);
@@ -46,7 +46,7 @@ class CheckIO: public IOChannel { public:
 		memcpy(buffer+check_size, data, len);
 		check_size += len;
 
-		return 0;
+		return len;
 	}
 };
 }

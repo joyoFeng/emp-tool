@@ -21,12 +21,12 @@ class HashIO: public IOChannel { public:
 	}
 	int send_data(const void * data, int len) {
 		h.put(data, len);
-		return 0;
+		return len;
 	}
 	int recv_data(void  * data, int len) {
 		netio->recv_data(data, len);
 		h.put(data, len);
-		return 0;
+		return len;
 	}
 	void get_digest(char * dgst){
 		h.digest(dgst);

@@ -52,9 +52,12 @@
 #ifndef LIBGARBLE_AES_H
 #define LIBGARBLE_AES_H
 
+#ifndef _WIN32
+
 #if !defined (__AES__)
-    #error "AES-NI instructions not enabled"
+#error "AES-NI instructions not enabled"
 #endif
+
 
 #include "block.h"
 #include "emp-tool/utils/sse.h"
@@ -152,3 +155,4 @@ AES_ecb_decrypt_blks(block *blks, unsigned nblks, const AES_KEY *key)
 }
 }
 #endif
+#endif//WIN32

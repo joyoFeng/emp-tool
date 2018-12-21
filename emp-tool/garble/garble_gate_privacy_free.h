@@ -1,7 +1,7 @@
 #ifndef LIBGARBLE_GARBLE_GATE_PRIVACY_FREE_H
 #define LIBGARBLE_GARBLE_GATE_PRIVACY_FREE_H
 
-#include "emp-tool/garble/aes.h"
+#include "emp-tool/garble/garble_aes.h"
 #include <assert.h>
 #include <string.h>
 namespace emp {

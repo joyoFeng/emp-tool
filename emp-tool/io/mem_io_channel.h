@@ -47,7 +47,7 @@ class MemIO: public IOChannel { public:
 		memcpy(buffer + size, data, len);
 		size += len;
 
-		return 0;
+		return len;
 	}
 
 	int recv_data(void  * data, int len) {
@@ -59,7 +59,7 @@ class MemIO: public IOChannel { public:
 			return -1;
 		}
 
-		return 0;
+		return len;
 	}
 };
 /**@}*/

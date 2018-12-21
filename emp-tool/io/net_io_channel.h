@@ -7,160 +7,228 @@
 #include <string.h>
 #include <string>
 #include "emp-tool/io/io_channel.h"
+#include "constants.h"
 using std::string;
 
-#ifdef UNIX_PLATFORM
-
+#if defined(WIN32)  || defined(__WIN32__) || defined(_WIN32) || defined(_WIN64) || defined(__WINDOWS__)
+#include <WS2tcpip.h>
+#include <Windows.h>
+#else
 #include <unistd.h>
-#include <arpa/inet.h>
 #include <sys/types.h>
-#include <netinet/tcp.h>
-#include <netinet/in.h>
 #include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#endif//
+
+#ifndef EMP_TOOL_BOOST_ENABLE
 
 namespace emp {
 /** @addtogroup IO
   @{
  */
+	class NetIO : public IOChannel {
+	private:
+		bool is_server;
+		int mysocket = -1;
+		int consocket = -1;
+		char * buffer = nullptr;
+		bool has_sent = false;
+		std::string addr;
+		int port;
+		uint64_t counter = 0;
 
-class NetIO: public IOChannel { public:
-	bool is_server;
-	int mysocket = -1;
-	int consocket = -1;
-	FILE * stream = nullptr;
-	char * buffer = nullptr;
-	bool has_sent = false;
-	string addr;
-	int port;
-	uint64_t counter = 0;
-	NetIO(const char * address, int port, bool quiet = false) {
-		this->port = port;
-		is_server = (address == nullptr);
-		if (address == nullptr) {
-			struct sockaddr_in dest;
-			struct sockaddr_in serv;
-			socklen_t socksize = sizeof(struct sockaddr_in);
-			memset(&serv, 0, sizeof(serv));
-			serv.sin_family = AF_INET;
-			serv.sin_addr.s_addr = htonl(INADDR_ANY); /* set our address to any interface */
-			serv.sin_port = htons(port);           /* set the server port number */    
-			mysocket = socket(AF_INET, SOCK_STREAM, 0);
-			int reuse = 1;
-			setsockopt(mysocket, SOL_SOCKET, SO_REUSEADDR, (const char*)&reuse, sizeof(reuse));
-			if(bind(mysocket, (struct sockaddr *)&serv, sizeof(struct sockaddr)) < 0) {
-				perror("error: bind");
-				exit(1);
-			}
-			if(listen(mysocket, 1) < 0) {
-				perror("error: listen");
-				exit(1);
-			}
-			consocket = accept(mysocket, (struct sockaddr *)&dest, &socksize);
-		}
-		else {
-			addr = string(address);
-			
-			struct sockaddr_in dest;
-			memset(&dest, 0, sizeof(dest));
-			dest.sin_family = AF_INET;
-			dest.sin_addr.s_addr = inet_addr(address);
-			dest.sin_port = htons(port);
+	public:
+		NetIO(const char * address, int port)
+		{
+#if defined(WIN32)  || defined(__WIN32__) || defined(_WIN32) || defined(_WIN64) || defined(__WINDOWS__)
+			static bool bLoad = false;
+			if (!bLoad)
+			{
+				WORD wVersionRequested;
+				WSADATA wsaData;
+				int err;
 
-			while(1) {
-				consocket = socket(AF_INET, SOCK_STREAM, 0);
+				/* Use the MAKEWORD(lowbyte, highbyte) macro declared in Windef.h */
+				wVersionRequested = MAKEWORD(2, 2);
 
-				if (connect(consocket, (struct sockaddr *)&dest, sizeof(struct sockaddr)) == 0) {
-					break;
+				err = WSAStartup(wVersionRequested, &wsaData);
+				if (err != 0)
+				{
+					printf("Windows load socket failed with error: %d\n", err);
+					return;
 				}
-				
-				close(consocket);
-				usleep(1000);
+				bLoad = true;
 			}
-		}
-		set_nodelay();
-		stream = fdopen(consocket, "wb+");
-		buffer = new char[NETWORK_BUFFER_SIZE];
-		memset(buffer, 0, NETWORK_BUFFER_SIZE);
-		setvbuf(stream, buffer, _IOFBF, NETWORK_BUFFER_SIZE);
-		if(!quiet)
-			std::cout << "connected\n";
-	}
+#endif
+			this->port = port;
+			is_server = (address == nullptr);
 
-	void sync() {
-		int tmp = 0;
-		if(is_server) {
-			send_data(&tmp, 1);
-			recv_data(&tmp, 1);
-		} else {
-			recv_data(&tmp, 1);
-			send_data(&tmp, 1);
-			flush();
-		}
-	}
+			if (address == nullptr)
+			{
+				struct sockaddr_in dest;
+				struct sockaddr_in serv;
+				socklen_t socksize = sizeof(struct sockaddr_in);
+				memset(&serv, 0, sizeof(serv));
+				serv.sin_family = AF_INET;
+				serv.sin_addr.s_addr = htonl(INADDR_ANY); /* set our address to any interface */
+				serv.sin_port = htons(port);           /* set the server port number */
+				mysocket = socket(AF_INET, SOCK_STREAM, 0);
+				int reuse = 1;
+				setsockopt(mysocket, SOL_SOCKET, SO_REUSEADDR, (const char*)&reuse, sizeof(reuse));
+				if (::bind(mysocket, (struct sockaddr *)&serv, sizeof(struct sockaddr)) < 0) {
+					perror("error: bind");
+					exit(1);
+				}
 
-	~NetIO(){
-		fflush(stream);
-		close(consocket);
-		delete[] buffer;
-	}
+				//cout << "run as server to listen..." << endl;
+				if (listen(mysocket, 1) < 0) {
+					perror("error: listen");
+					exit(1);
+				}
+				std::cout << "waiting for connect..." << std::endl;
+				consocket = accept(mysocket, (struct sockaddr *)&dest, &socksize);
 
-	void set_nodelay() {
-		const int one=1;
-		setsockopt(consocket,IPPROTO_TCP,TCP_NODELAY,&one,sizeof(one));
-	}
-
-	void set_delay() {
-		const int zero = 0;
-		setsockopt(consocket,IPPROTO_TCP,TCP_NODELAY,&zero,sizeof(zero));
-	}
-
-	void flush() {
-		fflush(stream);
-	}
-
-	int send_data(const void * data, int len) {
-		counter += len;
-		int sent = 0;
-		while(sent < len) {
-			int res = fwrite(sent + (char*)data, 1, len - sent, stream);
-			if (res >= 0)
-				sent+=res;
+				std::cout << "a client connected." << std::endl;
+			}
 			else
 			{
-				fprintf(stderr,"error: net_send_data %d\n", res);
-				return -1;
-			}	
+				addr = string(address);
+				struct sockaddr_in dest;
+				consocket = socket(AF_INET, SOCK_STREAM, 0);
+				memset(&dest, 0, sizeof(dest));
+				dest.sin_family = AF_INET;
+				dest.sin_addr.s_addr = inet_addr(address);
+				dest.sin_port = htons(port);
+				
+				while (connect(consocket, (struct sockaddr *)&dest, sizeof(struct sockaddr)) == -1) {
+					std::this_thread::sleep_for (std::chrono::seconds(1));
+					std::cerr << "waiting to connect " << address << "..." << std::endl;
+				}
+				std::cout << "as a client connect to " << address << "ok" << std::endl;
+				//cout << "the client has connected to server..." << endl;
+			}
+			setNoDelay(true);
+
+			buffer = new char[NETWORK_BUFFER_SIZE];
+			memset(buffer, 0, NETWORK_BUFFER_SIZE);
+			//		setvbuf(stream, buffer, _IOFBF, NETWORK_BUFFER_SIZE);
+					//cout << "connected"<<endl;
 		}
-		has_sent = true;
 
-		return 0;
-	}
-
-	int recv_data(void  * data, int len) {
-		if(has_sent)
-			fflush(stream);
-		has_sent = false;
-		int sent = 0;
-		while(sent < len) {
-			int res = fread(sent + (char*)data, 1, len - sent, stream);
-			if (res >= 0)
-			{	sent += res;}
-			else 
-			{	
-				fprintf(stderr,"error: net_send_data %d\n", res);
-				return -1;
+		void sync()
+		{
+			int tmp = 0;
+			if (is_server)
+			{
+				send_data(&tmp, 1);
+				recv_data(&tmp, 1);
+			}
+			else
+			{
+				recv_data(&tmp, 1);
+				send_data(&tmp, 1);
+				flush();
 			}
 		}
 
-		return 0;
-	}
-};
-/**@}*/
+		~NetIO()
+		{
+#if defined(WIN32)  || defined(__WIN32__) || defined(_WIN32) || defined(_WIN64) || defined(__WINDOWS__)
+			closesocket(consocket);
+			closesocket(mysocket);
+#else
+			close(consocket);
+			close(mysocket);
+#endif//
 
-}
+			delete[] buffer;
+		}
 
-#else  // not UNIX_PLATFORM
+		void setNoDelay(bool flag)
+		{
+#if defined(WIN32)  || defined(__WIN32__) || defined(_WIN32) || defined(_WIN64) || defined(__WINDOWS__)
+			bool nodelay = flag;
+			int ret = setsockopt(consocket, SOL_SOCKET, TCP_NODELAY, (char *)&nodelay, sizeof(nodelay));
+			if (ret == SOCKET_ERROR) {
+				printf("setsockopt for SO_KEEPALIVE failed");
+			}
+#else
+			const int one = flag ? 1 : 0;
+			setsockopt(consocket, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
+#endif//
+		}
 
+		void flush()
+		{
+		}
+
+		int send_data(const void * data, int len)
+		{
+			counter += len;
+			int sent = 0;
+			while (sent < len)
+			{
+				int res = send(consocket, (char*)data + sent, len - sent, 0);
+				if (res >= 0)
+				{
+					sent += res;
+					//cout << "the expect len: " << len << " NetIO::send_data_impl has sent: " << sent << " bytes! this round send: " << res << endl;
+				}
+				else
+				{
+					fprintf(stderr, "error: send ret: %d, len: %d, errno: %d\n", res, len, errno);
+					break;
+				}
+			}
+			has_sent = true;
+
+			if (sent != len)
+				return -1;
+
+			return 0;
+		}
+
+		int recv_data(void  * data, int len)
+		{
+			has_sent = false;
+			int sent = 0;
+			while (sent < len)
+			{
+				int res = recv(consocket, (char*)data + sent, len - sent, 0);
+				if (res > 0)
+				{
+					sent += res;
+					//cout << "the expect len: " << len << "NetIO::recv_data_impl has received: " << sent << " bytes! this round recv: " << res << endl;
+				}
+				else if (res == 0)
+				{
+					//cout << "the peer has closed !" << endl;
+					//SocketUtils::CloseSocket(consocket);
+					break;
+				}
+				else
+				{
+					fprintf(stderr, "to recv %d bytes failed!! error: recv %d, errno: %d \n", len, res, errno);
+					if (errno == EINTR || errno == EAGAIN)
+						continue;
+
+					break;
+				}
+			}
+
+			if (sent != len)
+				return -1;
+
+			return 0;
+		}
+	};
+
+}//emp
+
+#else//EMP_TOOL_BOOST_ENABLE
 #include <boost/asio.hpp>
 using boost::asio::ip::tcp;
 
@@ -169,7 +237,7 @@ namespace emp {
 /** @addtogroup IO
   @{
  */
-class NetIO: public IOChannel<NetIO> { 
+class NetIO: public IOChannel { 
 public:
 	bool is_server;
 	string addr;
@@ -233,7 +301,7 @@ public:
 		buffer_ptr = 0;
 	}
 
-	void send_data(const void * data, int len) {
+	int send_data(const void * data, int len) {
 		counter += len;
 		if (len >= buffer_cap) {
 			if(has_send) {
@@ -241,16 +309,18 @@ public:
 			}
 			has_send = false;
 			boost::asio::write(s, boost::asio::buffer(data, len));
-			return;
+			return -1;
 		}
 		if (buffer_ptr + len > buffer_cap)
 			flush();
 		memcpy(buffer + buffer_ptr, data, len);
 		buffer_ptr += len;
 		has_send = true;
+
+		return 0;
 	}
 
-	void recv_data(void  * data, int len) {
+	int recv_data(void  * data, int len) {
 		int sent = 0;
 		if(has_send) {
 			flush();
@@ -263,10 +333,11 @@ public:
 			else 
 				fprintf(stderr,"error: net_send_data %d\n", res);
 		}
+
+		return 0;
 	}
 };
 
 }
-
-#endif  //UNIX_PLATFORM
+#endif//EMP_TOOL_BOOST_ENABLE
 #endif  //NETWORK_IO_CHANNEL

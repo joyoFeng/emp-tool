@@ -6,12 +6,14 @@
 #include <sstream>
 #include <cstddef>//https://gcc.gnu.org/gcc-4.9/porting_to.html
 
-#ifndef OT_NP_USE_MIRACL
-#include <gmp.h>
-#else
+#ifdef OT_NP_USE_MIRACL
 ////Note: we take miracl functions instead of gmp !
 #include "emp-tool/utils/miracl_utils.h"
 #endif
+
+#ifndef _WIN32
+#include <gmp.h>
+#endif//
 
 #include "emp-tool/utils/prg.h"
 #include <chrono>

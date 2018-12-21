@@ -9,7 +9,7 @@
 
 
 using std::string;
-
+using std::min;
 
 namespace emp
 {

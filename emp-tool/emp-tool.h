@@ -35,7 +35,7 @@
 #include "emp-tool/gc/privacy_free_eva.h"
 #include "emp-tool/gc/privacy_free_gen.h"
 
-#include "emp-tool/garble/aes.h"
+#include "emp-tool/garble/garble_aes.h"
 #include "emp-tool/garble/garble_gate_halfgates.h"
 #include "emp-tool/garble/garble_gate_privacy_free.h"
 

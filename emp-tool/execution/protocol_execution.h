@@ -1,6 +1,5 @@
 #ifndef PROTOCOL_EXECUTION_H__
 #define PROTOCOL_EXECUTION_H__
-#include <pthread.h>  
 #include "block.h"
 #include "constants.h"
 

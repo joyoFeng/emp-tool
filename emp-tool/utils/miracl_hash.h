@@ -7,8 +7,8 @@
 #include <stdio.h>
 #include <string>
 
-#include "emp-too/mpc/block.h"
-#include "emp-too/mpc/constants.h"
+#include "block.h"
+#include "constants.h"
 
 #include "emp-tool/utils/kdf.h"
 #include "emp-tool/utils/miracl_utils.h"
