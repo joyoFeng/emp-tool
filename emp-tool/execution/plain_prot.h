@@ -3,6 +3,8 @@
 #include "emp-tool/emp-tool.h"
 #ifdef OT_NP_USE_MIRACL
 #include "emp-tool/utils/sm2_params.h"
+#else
+#include "emp-tool/utils/utils_ec.h"
 #endif//
 #include <iostream>
 #include <fstream>
@@ -53,6 +55,8 @@ public:
 inline void setup_plain_prot(bool print, string filename) {
 #ifdef OT_NP_USE_MIRACL
 	SM2_Init();
+#else
+	initialize_relic();
 #endif//
 	
 	CircuitExecutionProxy::circ_exec.setup(new PlainCircExec(print, filename));

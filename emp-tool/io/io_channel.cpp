@@ -470,7 +470,7 @@ namespace emp
 			return 0;
 		}
 
-#endif//JUZIX_OT_USE_RELIC
+#endif//OT_NP_USE_MIRACL
 
 }//emp
 

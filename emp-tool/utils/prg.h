@@ -12,7 +12,7 @@
 
 #ifdef EMP_USE_RANDOM_DEVICE
 #else
-#include <x86intrin.h>
+#include <immintrin.h>//x86intrin.h
 #endif
 
 

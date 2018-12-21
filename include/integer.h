@@ -1,6 +1,7 @@
 #ifndef INTEGER_H__
 #define INTEGER_H__
 
+#include "constants.h"
 #include "bit.h"
 #include "number.h"
 #include "comparable.h"
